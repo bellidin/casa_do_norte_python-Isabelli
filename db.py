@@ -1,0 +1,24 @@
+import sqlite3  
+import os       
+
+DBFILENAME = "comidasdb.sqlite"  # Nome do arquivo do banco de dados
+
+def getconnection():
+    conn = sqlite3.connect(DBFILENAME)
+    conn.row_factory = sqlite3.Row
+
+    conn.execute("PRAGMA foreign_keys = ON")
+    return conn
+
+
+def ensuredb():
+
+    if not os.path.exists(DBFILENAME):
+        scriptpath = os.path.join(os.path.dirname(__file__), "db_init.sql")
+        if os.path.exists(scriptpath):
+            with getconnection() as conn:
+                with open(scriptpath, "r", encoding="utf-8") as f:
+                    conn.executescript(f.read())
+        else:
+            # Gera erro caso o arquivo db_init.sql não esteja disponível
+            raise FileNotFoundError("db_init.sql não encontrado. Coloque db_init.sql na mesma pasta.")
